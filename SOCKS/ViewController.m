@@ -28,7 +28,12 @@ extern int socks_main(int argc, const char** argv);
         const char *argv[] = {"microsocks", "-p", portbuf, NULL};
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.statusLabel setText:[NSString stringWithFormat:@"Running at %@:%d", [AppDelegate deviceIPAddress], port]];
+            NSDictionary* addresses = [AppDelegate deviceIPAddress];
+            NSString* address = @"";
+            for (id key in [addresses keyEnumerator]) {
+                address = [NSString stringWithFormat:@"%@\n%@: %@:%d",address,key,[addresses objectForKey:key],port];
+            }
+            [self.statusLabel setText:[NSString stringWithFormat:@"Running at%@", address]];
         });
 
         int status = socks_main(3, argv);

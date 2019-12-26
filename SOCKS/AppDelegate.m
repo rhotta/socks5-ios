@@ -17,12 +17,14 @@
 
 @implementation AppDelegate
 
-+ (NSString *)deviceIPAddress
++ (NSDictionary *)  deviceIPAddress
 {
     NSString *address = @"error";
     struct ifaddrs *interfaces = NULL;
     struct ifaddrs *temp_addr = NULL;
     int success = 0;
+    
+    NSMutableDictionary* addresses = [[NSMutableDictionary alloc] init];
     
 #if TARGET_IPHONE_SIMULATOR
 #error Specify network interface for computer(iPhone simulator) below and then remove this line
@@ -39,10 +41,8 @@
         while (temp_addr != NULL) {
             if( temp_addr->ifa_addr->sa_family == AF_INET) {
                 // Check if interface is en0 which is the wifi connection on the iPhone
-                if ([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:networkInterface]) {
-                    // Get NSString from C String
-                    address = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)];
-                }
+                [addresses setObject:[NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)]
+                              forKey:[NSString stringWithUTF8String:temp_addr->ifa_name]];
             }
             
             temp_addr = temp_addr->ifa_next;
@@ -52,7 +52,7 @@
     // Free memory
     freeifaddrs(interfaces);
     
-    return address;
+    return [NSDictionary dictionaryWithDictionary:addresses];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
